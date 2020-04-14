@@ -1,7 +1,5 @@
 module github.com/olivere/elastic/v7
 
-go 1.17
-
 require (
 	github.com/aws/aws-sdk-go v1.43.21
 	github.com/fortytw2/leaktest v1.3.0
@@ -25,4 +23,4 @@ require (
 	go.opentelemetry.io/otel/trace v1.5.0 // indirect
 )
 
-go 1.13
+go 1.17
