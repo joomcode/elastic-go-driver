@@ -676,6 +676,7 @@ type SearchResult struct {
 	Shards          *ShardsInfo          `json:"_shards,omitempty"`      // shard information
 	Status          int                  `json:"status,omitempty"`       // used in MultiSearch
 	PitId           string               `json:"pit_id,omitempty"`       // Point In Time ID
+	RescorerInfo    *RescorerInfo        `json:"rescorer_info,omitempty"` // arbitrary return result from rescorer
 }
 
 // SearchResultCluster holds information about a search response
@@ -916,6 +917,15 @@ type ProfileResult struct {
 	Breakdown     map[string]int64       `json:"breakdown,omitempty"`
 	Children      []ProfileResult        `json:"children,omitempty"`
 	Debug         map[string]interface{} `json:"debug,omitempty"`
+}
+
+type RescorerInfo struct {
+	Shards []RescorerShardResult `json:"shards"`
+}
+
+type RescorerShardResult struct {
+	ID      string `json:"id"`
+	Payload string `json:"payload"`
 }
 
 // Aggregations (see search_aggs.go)

@@ -24,3 +24,5 @@ require (
 	github.com/smartystreets/gunit v1.4.2 // indirect
 	go.opentelemetry.io/otel/trace v1.5.0 // indirect
 )
+
+go 1.13
