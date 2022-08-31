@@ -40,13 +40,14 @@ type SearchService struct {
 	expandWildcards            string // expand_wildcards
 	lenient                    *bool  // lenient
 	maxResponseSize            int64
-	allowPartialSearchResults  *bool // allow_partial_search_results
-	typedKeys                  *bool // typed_keys
-	seqNoPrimaryTerm           *bool // seq_no_primary_term
-	batchedReduceSize          *int  // batched_reduce_size
-	maxConcurrentShardRequests *int  // max_concurrent_shard_requests
-	preFilterShardSize         *int  // pre_filter_shard_size
-	restTotalHitsAsInt         *bool // rest_total_hits_as_int
+	nodeIDForRequest           string // prefer sending resulting http request to this node directly
+	allowPartialSearchResults  *bool  // allow_partial_search_results
+	typedKeys                  *bool  // typed_keys
+	seqNoPrimaryTerm           *bool  // seq_no_primary_term
+	batchedReduceSize          *int   // batched_reduce_size
+	maxConcurrentShardRequests *int   // max_concurrent_shard_requests
+	preFilterShardSize         *int   // pre_filter_shard_size
+	restTotalHitsAsInt         *bool  // rest_total_hits_as_int
 
 	ccsMinimizeRoundtrips *bool // ccs_minimize_roundtrips
 
@@ -431,6 +432,11 @@ func (s *SearchService) MaxResponseSize(maxResponseSize int64) *SearchService {
 	return s
 }
 
+func (s *SearchService) NodeIDForRequest(nodeID string) *SearchService {
+	s.nodeIDForRequest = nodeID
+	return s
+}
+
 // AllowPartialSearchResults indicates if an error should be returned if
 // there is a partial search failure or timeout.
 func (s *SearchService) AllowPartialSearchResults(enabled bool) *SearchService {
@@ -624,6 +630,7 @@ func (s *SearchService) Do(ctx context.Context) (*SearchResult, error) {
 		Body:            body,
 		Headers:         s.headers,
 		MaxResponseSize: s.maxResponseSize,
+		PreferNodeID:    s.nodeIDForRequest,
 	})
 	if err != nil {
 		return nil, err

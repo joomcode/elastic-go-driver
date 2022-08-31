@@ -1224,6 +1224,29 @@ func (c *Client) next() (*conn, error) {
 	return nil, errors.Wrap(ErrNoClient, "no available connection")
 }
 
+func (c *Client) getConnForNodeID(nodeID string) *conn {
+	if nodeID == "" {
+		return nil
+	}
+
+	c.connsMu.Lock()
+	defer c.connsMu.Unlock()
+
+	for _, conn := range c.conns {
+		if conn.NodeID() == nodeID {
+			if !conn.IsDead() {
+				return conn
+			} else {
+				c.errorf("Node %s is dead", nodeID)
+				return nil
+			}
+		}
+	}
+
+	c.errorf("Node %s is unknown", nodeID)
+	return nil
+}
+
 // mustActiveConn returns nil if there is an active connection,
 // otherwise ErrNoClient is returned.
 func (c *Client) mustActiveConn() error {
@@ -1251,6 +1274,7 @@ type PerformRequestOptions struct {
 	Retrier         Retrier
 	Headers         http.Header
 	MaxResponseSize int64
+	PreferNodeID    string
 }
 
 // PerformRequest does a HTTP request to Elasticsearch.
@@ -1296,7 +1320,10 @@ func (c *Client) PerformRequest(ctx context.Context, opt PerformRequestOptions) 
 		}
 
 		// Get a connection
-		conn, err = c.next()
+		conn = c.getConnForNodeID(opt.PreferNodeID)
+		if conn == nil {
+			conn, err = c.next()
+		}
 		if errors.Cause(err) == ErrNoClient {
 			n++
 			if !retried {
