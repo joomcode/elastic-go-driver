@@ -9,7 +9,6 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strings"
 )
@@ -112,15 +111,22 @@ func (r *Request) setBodyGzip(body interface{}) error {
 
 // setBodyReader writes the body from an io.Reader.
 func (r *Request) setBodyReader(newBodyReader func() io.Reader) error {
-	body := newBodyReader()
-	rc, ok := body.(io.ReadCloser)
-	if !ok && body != nil {
-		rc = ioutil.NopCloser(body)
+	newReadCloser := func() (io.Reader, io.ReadCloser) {
+		body := newBodyReader()
+		rc, ok := body.(io.ReadCloser)
+		if !ok && body != nil {
+			rc = io.NopCloser(body)
+		}
+		return body, rc
 	}
+
+	body, rc := newReadCloser()
 	r.Body = rc
 	r.GetBody = func() (io.ReadCloser, error) {
-		return io.NopCloser(newBodyReader()), nil
+		_, rc := newReadCloser()
+		return rc, nil
 	}
+
 	if body != nil {
 		switch v := body.(type) {
 		case *strings.Reader:
