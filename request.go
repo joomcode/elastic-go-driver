@@ -57,13 +57,17 @@ func (r *Request) setBodyJson(data interface{}) error {
 		return err
 	}
 	r.Header.Set("Content-Type", "application/json")
-	r.setBodyReader(bytes.NewReader(body))
+	r.setBodyReader(func() io.Reader {
+		return bytes.NewReader(body)
+	})
 	return nil
 }
 
 // setBodyString encodes the body as a string.
 func (r *Request) setBodyString(body string) error {
-	return r.setBodyReader(strings.NewReader(body))
+	return r.setBodyReader(func() io.Reader {
+		return strings.NewReader(body)
+	})
 }
 
 // setBodyGzip gzip's the body. It accepts both strings and structs as body.
@@ -81,7 +85,9 @@ func (r *Request) setBodyGzip(body interface{}) error {
 		}
 		r.Header.Add("Content-Encoding", "gzip")
 		r.Header.Add("Vary", "Accept-Encoding")
-		return r.setBodyReader(bytes.NewReader(buf.Bytes()))
+		return r.setBodyReader(func() io.Reader {
+			return bytes.NewReader(buf.Bytes())
+		})
 	default:
 		data, err := json.Marshal(b)
 		if err != nil {
@@ -98,17 +104,23 @@ func (r *Request) setBodyGzip(body interface{}) error {
 		r.Header.Add("Content-Encoding", "gzip")
 		r.Header.Add("Vary", "Accept-Encoding")
 		r.Header.Set("Content-Type", "application/json")
-		return r.setBodyReader(bytes.NewReader(buf.Bytes()))
+		return r.setBodyReader(func() io.Reader {
+			return bytes.NewReader(buf.Bytes())
+		})
 	}
 }
 
 // setBodyReader writes the body from an io.Reader.
-func (r *Request) setBodyReader(body io.Reader) error {
+func (r *Request) setBodyReader(newBodyReader func() io.Reader) error {
+	body := newBodyReader()
 	rc, ok := body.(io.ReadCloser)
 	if !ok && body != nil {
 		rc = ioutil.NopCloser(body)
 	}
 	r.Body = rc
+	r.GetBody = func() (io.ReadCloser, error) {
+		return io.NopCloser(newBodyReader()), nil
+	}
 	if body != nil {
 		switch v := body.(type) {
 		case *strings.Reader:
