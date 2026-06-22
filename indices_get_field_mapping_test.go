@@ -21,7 +21,7 @@ func TestIndicesGetFieldMappingURL(t *testing.T) {
 			[]string{},
 			[]string{},
 			[]string{},
-			"/_all/_mapping/_all/field/%2A",
+			"/_all/_mapping/field/%2A",
 		},
 		{
 			[]string{},

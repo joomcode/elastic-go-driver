@@ -181,6 +181,7 @@ func (s *PingService) Do(ctx context.Context) (*PingResult, int, error) {
 	if req.Header.Get("User-Agent") == "" {
 		req.Header.Add("User-Agent", "elastic/"+Version+" ("+runtime.GOOS+"-"+runtime.GOARCH+")")
 	}
+	s.client.applyCompatibilityHeaders(req, "")
 
 	res, err := s.client.c.Do((*http.Request)(req).WithContext(ctx))
 	if err != nil {

@@ -72,9 +72,7 @@ func TestSearchWithCustomHTTPHeaders(t *testing.T) {
 	if got, want := res.TotalHits(), int64(3); got != want {
 		t.Errorf("expected SearchResult.TotalHits() = %d; got %d", want, got)
 	}
-	if got, want := res.Header.Get("Content-Type"), "application/json; charset=UTF-8"; got != want {
-		t.Errorf("expected SearchResult.Header(%q) = %q; got %q", "Content-Type", want, got)
-	}
+	assertJSONContentType(t, res.Header.Get("Content-Type"))
 }
 
 func TestSearchMatchAllWithRequestCacheDisabled(t *testing.T) {

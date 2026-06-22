@@ -10,7 +10,7 @@ import (
 )
 
 func TestCatIndices(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) // , SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) // , SetTraceLog(log.New(os.Stdout, "", 0)))
 	ctx := context.Background()
 	res, err := client.CatIndices().Columns("*").Do(ctx)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestCatIndicesResponseRowAliasesMap(t *testing.T) {
 
 // TestCatIndicesWithAliases makes a simple test (if ?h=h will be the same as ?h=health)
 func TestCatIndicesWithAliases(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) // , SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) // , SetTraceLog(log.New(os.Stdout, "", 0)))
 	ctx := context.Background()
 	res, err := client.CatIndices().Columns("h").Do(ctx)
 	if err != nil {
@@ -60,7 +60,7 @@ func TestCatIndicesWithAliases(t *testing.T) {
 // TestCatIndicesWithAliases makes a test with a double-alias
 // asking `?h=rti` will fill one of the refresh.external_time/refresh.time fields (depending on elasticsearch version)
 func TestCatIndicesWithAliases_Double(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) // , SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) // , SetTraceLog(log.New(os.Stdout, "", 0)))
 	ctx := context.Background()
 	res, err := client.CatIndices().Columns("rti").Do(ctx)
 	if err != nil {

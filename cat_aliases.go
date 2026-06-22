@@ -219,4 +219,6 @@ type CatAliasesResponseRow struct {
 	RoutingSearch string `json:"routing.search"`
 	// IsWriteIndex indicates whether the index can be written to (or "-").
 	IsWriteIndex string `json:"is_write_index"`
+	// Errors indicates alias errors reported by Elasticsearch (or "-").
+	Errors string `json:"errors"`
 }

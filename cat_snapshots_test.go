@@ -9,7 +9,7 @@ import (
 )
 
 func TestCatSnapshots(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) // , SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) // , SetTraceLog(log.New(os.Stdout, "", 0)))
 
 	urls, params, err := client.CatSnapshots().Repository("my_repo").Columns("*").buildURL()
 	if err != nil {

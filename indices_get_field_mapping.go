@@ -139,18 +139,12 @@ func (s *IndicesGetFieldMappingService) IgnoreUnavailable(ignoreUnavailable bool
 
 // buildURL builds the URL for the operation.
 func (s *IndicesGetFieldMappingService) buildURL() (string, url.Values, error) {
-	var index, typ, field []string
+	var index, field []string
 
 	if len(s.index) > 0 {
 		index = s.index
 	} else {
 		index = []string{"_all"}
-	}
-
-	if len(s.typ) > 0 {
-		typ = s.typ
-	} else {
-		typ = []string{"_all"}
 	}
 
 	if len(s.field) > 0 {
@@ -160,11 +154,20 @@ func (s *IndicesGetFieldMappingService) buildURL() (string, url.Values, error) {
 	}
 
 	// Build URL
-	path, err := uritemplates.Expand("/{index}/_mapping/{type}/field/{field}", map[string]string{
-		"index": strings.Join(index, ","),
-		"type":  strings.Join(typ, ","),
-		"field": strings.Join(field, ","),
-	})
+	var path string
+	var err error
+	if len(s.typ) > 0 {
+		path, err = uritemplates.Expand("/{index}/_mapping/{type}/field/{field}", map[string]string{
+			"index": strings.Join(index, ","),
+			"type":  strings.Join(s.typ, ","),
+			"field": strings.Join(field, ","),
+		})
+	} else {
+		path, err = uritemplates.Expand("/{index}/_mapping/field/{field}", map[string]string{
+			"index": strings.Join(index, ","),
+			"field": strings.Join(field, ","),
+		})
+	}
 	if err != nil {
 		return "", url.Values{}, err
 	}

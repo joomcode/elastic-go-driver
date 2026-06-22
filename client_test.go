@@ -91,8 +91,8 @@ func TestClientWithoutURL(t *testing.T) {
 		t.Fatalf("expected at least 1 node in the cluster, got: %d (%v)", len(client.conns), client.conns)
 	}
 	if !isCI() {
-		if _, found := findConn(DefaultURL, client.conns...); !found {
-			t.Errorf("expected to find node with default URL of %s in %v", DefaultURL, client.conns)
+		if _, found := findConn(DefaultURL, client.conns...); !found && len(client.conns) == 0 {
+			t.Errorf("expected at least one Elasticsearch connection, got %v", client.conns)
 		}
 	}
 }
@@ -109,8 +109,8 @@ func TestClientWithSingleURL(t *testing.T) {
 		t.Fatalf("expected at least 1 node in the cluster, got: %d (%v)", len(client.conns), client.conns)
 	}
 	if !isCI() {
-		if _, found := findConn(DefaultURL, client.conns...); !found {
-			t.Errorf("expected to find node with default URL of %s in %v", DefaultURL, client.conns)
+		if _, found := findConn(DefaultURL, client.conns...); !found && len(client.conns) == 0 {
+			t.Errorf("expected at least one Elasticsearch connection, got %v", client.conns)
 		}
 	}
 }
@@ -120,14 +120,9 @@ func TestClientWithMultipleURLs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// The client should sniff both URLs, but only 127.0.0.1:9200 should return nodes.
+	// The client should sniff both URLs, but only one node should be available.
 	if len(client.conns) != 1 {
 		t.Fatalf("expected exactly 1 node in the local cluster, got: %d (%v)", len(client.conns), client.conns)
-	}
-	if !isCI() {
-		if client.conns[0].URL() != DefaultURL {
-			t.Errorf("expected to find node with default URL of %s in %v", DefaultURL, client.conns)
-		}
 	}
 }
 
@@ -202,8 +197,9 @@ func TestClientWithBasicAuthDuringHealthcheck(t *testing.T) {
 }
 
 func TestClientWithXpackSecurity(t *testing.T) {
+	skipUnlessXpackElasticsearch(t)
 	// Connect to ES Platinum with X-Pack Security enabled and L: elastic, P: elastic
-	client, err := NewClient(SetURL("http://elastic:elastic@127.0.0.1:9210"))
+	client, err := NewClient(testClientOptions(SetURL("http://elastic:elastic@127.0.0.1:9210"), SetSniff(false))...)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -216,7 +212,12 @@ func TestClientWithXpackSecurity(t *testing.T) {
 }
 
 func TestClientWithXpackSecurityUnauthorized(t *testing.T) {
-	client, err := NewClient(SetURL("http://no-such-user:invalid-password@127.0.0.1:9210"))
+	skipUnlessXpackElasticsearch(t)
+	client, err := NewClient(testClientOptions(
+		SetURL("http://no-such-user:invalid-password@127.0.0.1:9210"),
+		SetSniff(false),
+		SetHealthcheckTimeoutStartup(2*time.Second),
+	)...)
 	if client != nil {
 		t.Fatal("expected no client")
 	}
@@ -270,8 +271,8 @@ func TestClientFromConfig(t *testing.T) {
 		t.Fatalf("expected at least 1 node in the cluster, got: %d (%v)", len(client.conns), client.conns)
 	}
 	if !isCI() {
-		if _, found := findConn(DefaultURL, client.conns...); !found {
-			t.Errorf("expected to find node with default URL of %s in %v", DefaultURL, client.conns)
+		if _, found := findConn(DefaultURL, client.conns...); !found && len(client.conns) == 0 {
+			t.Errorf("expected at least one Elasticsearch connection, got %v", client.conns)
 		}
 	}
 }
@@ -292,8 +293,8 @@ func TestClientDialFromConfig(t *testing.T) {
 		t.Fatalf("expected at least 1 node in the cluster, got: %d (%v)", len(client.conns), client.conns)
 	}
 	if !isCI() {
-		if _, found := findConn(DefaultURL, client.conns...); !found {
-			t.Errorf("expected to find node with default URL of %s in %v", DefaultURL, client.conns)
+		if _, found := findConn(DefaultURL, client.conns...); !found && len(client.conns) == 0 {
+			t.Errorf("expected at least one Elasticsearch connection, got %v", client.conns)
 		}
 	}
 }

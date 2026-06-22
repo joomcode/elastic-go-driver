@@ -134,7 +134,7 @@ func (s *IndicesGetMappingService) IgnoreUnavailable(ignoreUnavailable bool) *In
 
 // buildURL builds the URL for the operation.
 func (s *IndicesGetMappingService) buildURL() (string, url.Values, error) {
-	var index, typ []string
+	var index []string
 
 	if len(s.index) > 0 {
 		index = s.index
@@ -142,17 +142,19 @@ func (s *IndicesGetMappingService) buildURL() (string, url.Values, error) {
 		index = []string{"_all"}
 	}
 
-	if len(s.typ) > 0 {
-		typ = s.typ
-	} else {
-		typ = []string{"_all"}
-	}
-
 	// Build URL
-	path, err := uritemplates.Expand("/{index}/_mapping/{type}", map[string]string{
-		"index": strings.Join(index, ","),
-		"type":  strings.Join(typ, ","),
-	})
+	var path string
+	var err error
+	if len(s.typ) > 0 {
+		path, err = uritemplates.Expand("/{index}/_mapping/{type}", map[string]string{
+			"index": strings.Join(index, ","),
+			"type":  strings.Join(s.typ, ","),
+		})
+	} else {
+		path, err = uritemplates.Expand("/{index}/_mapping", map[string]string{
+			"index": strings.Join(index, ","),
+		})
+	}
 	if err != nil {
 		return "", url.Values{}, err
 	}

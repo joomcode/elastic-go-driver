@@ -252,6 +252,7 @@ type CatShardsResponseRow struct {
 	State                     string `json:"state"`        // STARTED, INITIALIZING, RELOCATING, or UNASSIGNED
 	Docs                      int64  `json:"docs,string"`  // number of documents, e.g. 142847
 	Store                     string `json:"store"`        // size, e.g. "40mb"
+	Dataset                   string `json:"dataset"`      // dataset size
 	IP                        string `json:"ip"`           // IP address
 	ID                        string `json:"id"`
 	Node                      string `json:"node"` // Node name
@@ -318,6 +319,9 @@ type CatShardsResponseRow struct {
 	WarmerTotalTime           string `json:"warmer.total_time"`     // time spent in warmers on primaries & replicas, e.g. "47s"
 	PathData                  string `json:"path.data"`
 	PathState                 string `json:"path.state"`
+	IndexingIndexFailedDueToVersionConflict int `json:"indexing.index_failed_due_to_version_conflict,string"`
+	BulkTotalOperations       int    `json:"bulk.total_operations,string"`
+	BulkTotalTime             string `json:"bulk.total_time"`
 }
 
 // catShardsResponseRowAliasesMap holds the global map for columns aliases

@@ -10,7 +10,7 @@ import (
 )
 
 func TestCatAliases(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) //, SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) //, SetTraceLog(log.New(os.Stdout, "", 0)))
 	ctx := context.Background()
 
 	// Add two aliases

@@ -151,6 +151,9 @@ type Client struct {
 	retrier                   Retrier         // strategy for retries
 	retryStatusCodes          []int           // HTTP status codes where to retry automatically (with retrier)
 	headers                   http.Header     // a list of default headers to add to each request
+	compatibilityVersion      int             // 0 = off; >0 enables compatible-with=N headers
+	compatibilityAutoDetect   bool            // probe cluster version at startup when true
+	compatibilityProbeTimeout time.Duration   // per-host probe timeout; 0 = default
 }
 
 // NewClient creates a new client to work with Elasticsearch.
@@ -281,6 +284,12 @@ func NewSimpleClient(options ...ClientOptionFunc) (*Client, error) {
 		}
 	}
 
+	if c.compatibilityAutoDetect {
+		if err := c.resolveCompatibilityAuto(context.Background()); err != nil {
+			return nil, err
+		}
+	}
+
 	for _, url := range c.urls {
 		c.conns = append(c.conns, newConn(url, url))
 	}
@@ -364,6 +373,12 @@ func DialContext(ctx context.Context, options ...ClientOptionFunc) (*Client, err
 				c.basicAuthPassword, _ = u.User.Password()
 				break
 			}
+		}
+	}
+
+	if c.compatibilityAutoDetect {
+		if err := c.resolveCompatibilityAuto(ctx); err != nil {
+			return nil, err
 		}
 	}
 
@@ -990,6 +1005,7 @@ func (c *Client) sniffNode(ctx context.Context, url string) []*conn {
 	if req.Header.Get("User-Agent") == "" {
 		req.Header.Add("User-Agent", "elastic/"+Version+" ("+runtime.GOOS+"-"+runtime.GOARCH+")")
 	}
+	c.applyCompatibilityHeaders(req, "")
 
 	res, err := c.c.Do((*http.Request)(req).WithContext(ctx))
 	if err != nil {
@@ -1137,6 +1153,7 @@ func (c *Client) healthcheck(parentCtx context.Context, timeout time.Duration, f
 			if req.Header.Get("User-Agent") == "" {
 				req.Header.Add("User-Agent", "elastic/"+Version+" ("+runtime.GOOS+"-"+runtime.GOARCH+")")
 			}
+			c.applyCompatibilityHeaders(req, "")
 			res, err := c.c.Do((*http.Request)(req).WithContext(ctx))
 			if res != nil {
 				status = res.StatusCode
@@ -1449,6 +1466,7 @@ func (c *Client) PerformRequest(ctx context.Context, opt PerformRequestOptions) 
 				return nil, err
 			}
 		}
+		c.applyCompatibilityHeaders(req, opt.ContentType)
 
 		// Tracing
 		c.dumpRequest((*http.Request)(req))

@@ -10,7 +10,7 @@ import (
 )
 
 func TestCatShards(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) //, SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) //, SetTraceLog(log.New(os.Stdout, "", 0)))
 	ctx := context.Background()
 	res, err := client.CatShards().Columns("*").Pretty(true).Do(ctx)
 	if err != nil {
@@ -39,7 +39,7 @@ func TestCatShardsResponseRowAliasesMap(t *testing.T) {
 
 // TestCatShardsWithSpecificColumns makes a simple test with specific column names.
 func TestCatShardsWithSpecificColumns(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) // , SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) // , SetTraceLog(log.New(os.Stdout, "", 0)))
 	ctx := context.Background()
 	res, err := client.CatShards().Columns("index", "shard").Do(ctx)
 	if err != nil {

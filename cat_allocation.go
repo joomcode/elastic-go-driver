@@ -220,8 +220,12 @@ type CatAllocationResponse []CatAllocationResponseRow
 type CatAllocationResponseRow struct {
 	// Shards represents the number of shards on a node.
 	Shards int `json:"shards,string"`
+	// ShardsUndesired represents shards that do not meet allocation goals.
+	ShardsUndesired int `json:"shards.undesired,string"`
 	// DiskIndices represents the disk used by ES indices, e.g. "46.1kb".
 	DiskIndices string `json:"disk.indices"`
+	// DiskIndicesForecast is the forecasted disk usage by indices.
+	DiskIndicesForecast string `json:"disk.indices.forecast"`
 	// DiskUsed represents the disk used (total, not just ES), e.g. "34.5gb"
 	DiskUsed string `json:"disk.used"`
 	// DiskAvail represents the disk available, e.g. "53.2gb".
@@ -236,4 +240,8 @@ type CatAllocationResponseRow struct {
 	IP string `json:"ip"`
 	// Node represents the node ID.
 	Node string `json:"node"`
+	// NodeRole represents the roles of the node.
+	NodeRole string `json:"node.role"`
+	// WriteLoadForecast is the forecasted write load.
+	WriteLoadForecast string `json:"write_load.forecast"`
 }

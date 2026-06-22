@@ -12,6 +12,7 @@ import (
 
 func TestSyncedFlush(t *testing.T) {
 	client := setupTestClientAndCreateIndex(t)
+	skipIfElasticsearchMajorAtLeast(t, client, 8)
 	//client := setupTestClientAndCreateIndexAndLog(t)
 
 	// Sync Flush all indices

@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"testing"
 	"time"
 )
 
@@ -297,10 +298,96 @@ var (
 	strict          = flag.Bool("strict-decoder", false, "treat missing unknown fields in response as errors")
 	noSniff         = flag.Bool("no-sniff", false, "allows to disable sniffing globally")
 	noHealthcheck   = flag.Bool("no-healthcheck", false, "allows to disable healthchecks globally")
+	// compatibilityWith enables REST API compatibility headers for integration tests.
+	// Use 8 for Elasticsearch 8.x/9.x; 0 keeps plain application/json (ES 7.x); -1 auto-detects.
+	compatibilityWith = flag.Int("compatibility-with", -1, "Elasticsearch REST API compatible-with major version (-1=auto, 0=off, 8=ES8/9)")
 )
+
+func resolvedCompatibilityWith() int {
+	if *compatibilityWith >= 0 {
+		return *compatibilityWith
+	}
+	return -1
+}
+
+func testClientOptions(options ...ClientOptionFunc) []ClientOptionFunc {
+	switch resolvedCompatibilityWith() {
+	case 0:
+		// plain application/json (Elasticsearch 7.x)
+	case 8:
+		options = append([]ClientOptionFunc{SetCompatibilityWith(8)}, options...)
+	default:
+		options = append([]ClientOptionFunc{SetCompatibilityWithAuto()}, options...)
+	}
+	return options
+}
+
+func clientElasticsearchURL(client *Client) string {
+	client.connsMu.RLock()
+	defer client.connsMu.RUnlock()
+	if len(client.conns) > 0 {
+		return client.conns[0].URL()
+	}
+	return DefaultURL
+}
+
+func elasticsearchMajorVersion(client *Client) (int, error) {
+	version, err := client.ElasticsearchVersion(clientElasticsearchURL(client))
+	if err != nil {
+		return 0, err
+	}
+	var major int
+	_, err = fmt.Sscanf(version, "%d", &major)
+	return major, err
+}
+
+func skipIfElasticsearchMajorAtLeast(t testing.TB, client *Client, major int) {
+	t.Helper()
+	v, err := elasticsearchMajorVersion(client)
+	if err != nil {
+		t.Skipf("skipping: cannot determine Elasticsearch version: %v", err)
+	}
+	if v >= major {
+		t.Skipf("skipping: unsupported on Elasticsearch %d.x", major)
+	}
+}
+
+func skipUnlessXpackElasticsearch(t testing.TB) {
+	t.Helper()
+	_, err := NewClient(testClientOptions(
+		SetURL("http://127.0.0.1:9210"),
+		SetBasicAuth("elastic", "elastic"),
+		SetSniff(false),
+		SetHealthcheckTimeoutStartup(2*time.Second),
+	)...)
+	if err != nil {
+		t.Skipf("skipping: X-Pack Elasticsearch not available at :9210: %v", err)
+	}
+}
+
+func assertDocumentType(t testing.TB, got string) {
+	t.Helper()
+	if got != "" && got != "_doc" {
+		t.Errorf("expected document type empty or _doc, got %q", got)
+	}
+}
+
+func assertJSONContentType(t testing.TB, got string) {
+	t.Helper()
+	switch got {
+	case "application/json", "application/json; charset=UTF-8":
+		return
+	}
+	if strings.HasPrefix(got, "application/vnd.elasticsearch+json;compatible-with=") {
+		return
+	}
+	t.Errorf("expected JSON Content-Type, got %q", got)
+}
 
 func setupTestClient(t logger, options ...ClientOptionFunc) (client *Client) {
 	var err error
+
+	options = testClientOptions(options...)
 
 	if *noSniff {
 		options = append(options, SetSniff(false))
@@ -311,7 +398,14 @@ func setupTestClient(t logger, options ...ClientOptionFunc) (client *Client) {
 
 	client, err = NewClient(options...)
 	if err != nil {
-		t.Fatal(err)
+		switch tt := t.(type) {
+		case interface{ Skip(...interface{}) }:
+			tt.Skip("skipping: Elasticsearch is not available:", err)
+		case interface{ Skipf(string, ...interface{}) }:
+			tt.Skipf("skipping: Elasticsearch is not available: %v", err)
+		default:
+			t.Fatal(err)
+		}
 	}
 
 	// Use strict JSON decoder (unless a specific decoder has been specified already)
@@ -485,12 +579,23 @@ func setupTestClientAndCreateIndexAndAddDocsNoSource(t logger, options ...Client
 
 func setupTestClientForXpackSecurity(t logger) (client *Client) {
 	var err error
-	// Set URL and Auth to use the platinum ES cluster
-	options := []ClientOptionFunc{SetURL("http://127.0.0.1:9210"), SetBasicAuth("elastic", "elastic")}
+	options := testClientOptions(
+		SetURL("http://127.0.0.1:9210"),
+		SetBasicAuth("elastic", "elastic"),
+		SetSniff(false),
+		SetHealthcheckTimeoutStartup(2*time.Second),
+	)
 
 	client, err = NewClient(options...)
 	if err != nil {
-		t.Fatal(err)
+		switch tt := t.(type) {
+		case interface{ Skip(...interface{}) }:
+			tt.Skip("skipping: X-Pack Elasticsearch not available at :9210:", err)
+		case interface{ Skipf(string, ...interface{}) }:
+			tt.Skipf("skipping: X-Pack Elasticsearch not available at :9210: %v", err)
+		default:
+			t.Fatal(err)
+		}
 	}
 
 	return client

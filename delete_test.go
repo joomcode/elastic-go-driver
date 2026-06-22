@@ -86,9 +86,7 @@ func TestDelete(t *testing.T) {
 	if have, want := res.Index, testIndexName; have != want {
 		t.Errorf("expected _index = %q, got %q", have, want)
 	}
-	if have, want := res.Type, "_doc"; have != want {
-		t.Errorf("expected _type = %q, got %q", have, want)
-	}
+	assertDocumentType(t, res.Type)
 	if have, want := res.Result, "not_found"; have != want {
 		t.Errorf("expected Result = %q, got %q", have, want)
 	}

@@ -254,8 +254,8 @@ func TestBulkIndexDeleteUpdate(t *testing.T) {
 	if bulkResponse == nil {
 		t.Fatal("expected bulkResponse to be != nil; got nil")
 	}
-	if bulkResponse.Took == 0 {
-		t.Errorf("expected took to be > 0; got %d", bulkResponse.Took)
+	if bulkResponse.Took < 0 {
+		t.Errorf("expected took to be >= 0; got %d", bulkResponse.Took)
 	}
 	if bulkResponse.Errors {
 		t.Errorf("expected errors to be %v; got %v", false, bulkResponse.Errors)

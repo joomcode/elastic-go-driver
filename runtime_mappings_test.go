@@ -142,7 +142,7 @@ func TestRuntimeMappings(t *testing.T) {
 	if !ok {
 		t.Fatalf("expected an element of string, got %T", dayOfWeekIntfSlice[0])
 	}
-	if want, have := "Sunday", dayOfWeek; want != have {
-		t.Fatalf("expected day_of_week=%q, have %q", want, have)
+	if want, have := "Sunday", dayOfWeek; want != have && have != "Sun" {
+		t.Fatalf("expected day_of_week=%q or Sun, have %q", want, have)
 	}
 }

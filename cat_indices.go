@@ -268,6 +268,7 @@ type CatIndicesResponseRow struct {
 	CreationDateString           string `json:"creation.date.string"`                // index creation date (as string), e.g. "2018-05-23T12:07:01.644Z"
 	StoreSize                    string `json:"store.size"`                          // store size of primaries & replicas, e.g. "4.6kb"
 	PriStoreSize                 string `json:"pri.store.size"`                      // store size of primaries, e.g. "230b"
+	DatasetSize                  string `json:"dataset.size"`                        // dataset size of primaries & replicas
 	CompletionSize               string `json:"completion.size"`                     // size of completion on primaries & replicas
 	PriCompletionSize            string `json:"pri.completion.size"`                 // size of completion on primaries
 	FielddataMemorySize          string `json:"fielddata.memory_size"`               // used fielddata cache on primaries & replicas
@@ -387,6 +388,9 @@ type CatIndicesResponseRow struct {
 	PriSuggestTotal              int    `json:"pri.suggest.total,string"`            // number of suggest ops on primaries
 	MemoryTotal                  string `json:"memory.total"`                        // total user memory on primaries & replicas, e.g. "1.5kb"
 	PriMemoryTotal               string `json:"pri.memory.total"`                    // total user memory on primaries, e.g. "1.5kb"
+	IndexingIndexFailedDueToVersionConflict int `json:"indexing.index_failed_due_to_version_conflict,string"`
+	PriIndexingIndexFailedDueToVersionConflict int `json:"pri.indexing.index_failed_due_to_version_conflict,string"`
+	BulkTotalOperations                        int `json:"bulk.total_operations,string"`
 }
 
 // catIndicesResponseRowAliasesMap holds the global map for columns aliases

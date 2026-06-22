@@ -49,9 +49,7 @@ func TestIndexLifecycle(t *testing.T) {
 	if getResult.Index != testIndexName {
 		t.Errorf("expected GetResult.Index %q; got %q", testIndexName, getResult.Index)
 	}
-	if getResult.Type != "_doc" {
-		t.Errorf("expected GetResult.Type %q; got %q", "_doc", getResult.Type)
-	}
+	assertDocumentType(t, getResult.Type)
 	if getResult.Id != "1" {
 		t.Errorf("expected GetResult.Id %q; got %q", "1", getResult.Id)
 	}
@@ -132,9 +130,7 @@ func TestIndexLifecycleWithAutomaticIDGeneration(t *testing.T) {
 	if getResult.Index != testIndexName {
 		t.Errorf("expected GetResult.Index %q; got %q", testIndexName, getResult.Index)
 	}
-	if getResult.Type != "_doc" {
-		t.Errorf("expected GetResult.Type %q; got %q", "_doc", getResult.Type)
-	}
+	assertDocumentType(t, getResult.Type)
 	if getResult.Id != id {
 		t.Errorf("expected GetResult.Id %q; got %q", id, getResult.Id)
 	}

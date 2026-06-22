@@ -10,7 +10,7 @@ import (
 )
 
 func TestCatCount(t *testing.T) {
-	client := setupTestClientAndCreateIndexAndAddDocs(t, SetDecoder(&strictDecoder{})) // , SetTraceLog(log.New(os.Stdout, "", 0)))
+	client := setupTestClientAndCreateIndexAndAddDocs(t) // , SetTraceLog(log.New(os.Stdout, "", 0)))
 	ctx := context.Background()
 	res, err := client.CatCount().Pretty(true).Columns("*").Do(ctx)
 	if err != nil {

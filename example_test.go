@@ -240,6 +240,7 @@ func Example() {
 
 func ExampleNewClient_default() {
 	// Obtain a client to the Elasticsearch instance on http://127.0.0.1:9200.
+	// For Elasticsearch 8.x/9.x, also pass elastic.SetCompatibilityWith(8).
 	client, err := elastic.NewClient()
 	if err != nil {
 		// Handle error

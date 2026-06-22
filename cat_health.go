@@ -208,4 +208,5 @@ type CatHealthResponseRow struct {
 	PendingTasks        int    `json:"pending_tasks,string"`  // number of pending tasks
 	MaxTaskWaitTime     string `json:"max_task_wait_time"`    // wait time of longest task pending, e.g. "-" or time in millis
 	ActiveShardsPercent string `json:"active_shards_percent"` // active number of shards in percent, e.g. "100%"
+	UnassignPri         int    `json:"unassign.pri,string"`     // number of unassigned primary shards
 }

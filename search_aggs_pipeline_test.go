@@ -322,6 +322,7 @@ func TestAggsIntegrationSumBucket(t *testing.T) {
 func TestAggsIntegrationMovAvg(t *testing.T) {
 	//client := setupTestClientAndCreateIndexAndAddDocs(t, SetTraceLog(log.New(os.Stdout, "", log.LstdFlags)))
 	client := setupTestClientAndCreateIndexAndAddDocs(t)
+	skipIfElasticsearchMajorAtLeast(t, client, 8)
 
 	// Match all should return all documents
 	builder := client.Search().
