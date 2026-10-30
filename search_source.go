@@ -45,6 +45,7 @@ type SearchSource struct {
 	// TODO extBuilders []SearchExtBuilder // ext
 	pointInTime     *PointInTime // pit
 	runtimeMappings RuntimeMappings
+	knn             *KnnSearch // knn
 }
 
 // NewSearchSource initializes a new SearchSource.
@@ -383,6 +384,12 @@ func (s *SearchSource) RuntimeMappings(runtimeMappings RuntimeMappings) *SearchS
 	return s
 }
 
+// Knn sets a top-level approximate kNN search.
+func (s *SearchSource) Knn(knn *KnnSearch) *SearchSource {
+	s.knn = knn
+	return s
+}
+
 // Source returns the serializable JSON for the source builder.
 func (s *SearchSource) Source() (interface{}, error) {
 	source := make(map[string]interface{})
@@ -628,6 +635,14 @@ func (s *SearchSource) Source() (interface{}, error) {
 			return nil, err
 		}
 		source["runtime_mappings"] = src
+	}
+
+	if s.knn != nil {
+		src, err := s.knn.Source()
+		if err != nil {
+			return nil, err
+		}
+		source["knn"] = src
 	}
 
 	return source, nil
