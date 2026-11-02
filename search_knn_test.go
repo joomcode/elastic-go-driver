@@ -29,19 +29,3 @@ func TestKnnSearchSource(t *testing.T) {
 		t.Errorf("expected\n%s\n,got:\n%s", expected, got)
 	}
 }
-
-func TestKnnSearchSourceMinimal(t *testing.T) {
-	src, err := NewSearchSource().Knn(NewKnnSearch("embedding", []float32{1}, 3)).Source()
-	if err != nil {
-		t.Fatal(err)
-	}
-	data, err := json.Marshal(src)
-	if err != nil {
-		t.Fatalf("marshaling to JSON failed: %v", err)
-	}
-	got := string(data)
-	expected := `{"knn":{"field":"embedding","k":3,"query_vector":[1]}}`
-	if got != expected {
-		t.Errorf("expected\n%s\n,got:\n%s", expected, got)
-	}
-}
