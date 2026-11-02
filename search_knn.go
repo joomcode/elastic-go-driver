@@ -4,7 +4,6 @@
 
 package elastic
 
-// KnnSearch is a top-level kNN search. Unlike the knn query, it returns the global top k across shards.
 type KnnSearch struct {
 	field         string
 	queryVector   []float32

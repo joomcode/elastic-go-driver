@@ -45,7 +45,7 @@ type SearchSource struct {
 	// TODO extBuilders []SearchExtBuilder // ext
 	pointInTime     *PointInTime // pit
 	runtimeMappings RuntimeMappings
-	knn             *KnnSearch // knn
+	knn             *KnnSearch
 }
 
 // NewSearchSource initializes a new SearchSource.
@@ -384,7 +384,6 @@ func (s *SearchSource) RuntimeMappings(runtimeMappings RuntimeMappings) *SearchS
 	return s
 }
 
-// Knn sets a top-level approximate kNN search.
 func (s *SearchSource) Knn(knn *KnnSearch) *SearchSource {
 	s.knn = knn
 	return s
