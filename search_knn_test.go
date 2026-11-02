@@ -29,3 +29,26 @@ func TestKnnSearchSource(t *testing.T) {
 		t.Errorf("expected\n%s\n,got:\n%s", expected, got)
 	}
 }
+
+func TestKnnSearchSourceRescoreVectorOversample(t *testing.T) {
+	tests := []struct {
+		knn      *KnnSearch
+		expected string
+	}{
+		{NewKnnSearch("embedding", []float32{1}, 5), `{"field":"embedding","k":5,"query_vector":[1]}`},
+		{NewKnnSearch("embedding", []float32{1}, 5).RescoreVectorOversample(0), `{"field":"embedding","k":5,"query_vector":[1],"rescore_vector":{"oversample":0}}`},
+	}
+	for _, test := range tests {
+		src, err := test.knn.Source()
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := json.Marshal(src)
+		if err != nil {
+			t.Fatalf("marshaling to JSON failed: %v", err)
+		}
+		if got := string(data); got != test.expected {
+			t.Errorf("expected\n%s\n,got:\n%s", test.expected, got)
+		}
+	}
+}

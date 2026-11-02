@@ -11,7 +11,7 @@ type KnnSearch struct {
 	numCandidates int
 	filter        Query
 	similarity    *float32
-	oversample    float32
+	oversample    *float32
 }
 
 func NewKnnSearch(field string, queryVector []float32, k int) *KnnSearch {
@@ -34,7 +34,7 @@ func (s *KnnSearch) Similarity(similarity float32) *KnnSearch {
 }
 
 func (s *KnnSearch) RescoreVectorOversample(oversample float32) *KnnSearch {
-	s.oversample = oversample
+	s.oversample = &oversample
 	return s
 }
 
@@ -57,8 +57,8 @@ func (s *KnnSearch) Source() (interface{}, error) {
 	if s.similarity != nil {
 		src["similarity"] = *s.similarity
 	}
-	if s.oversample > 0 {
-		src["rescore_vector"] = map[string]interface{}{"oversample": s.oversample}
+	if s.oversample != nil {
+		src["rescore_vector"] = map[string]interface{}{"oversample": *s.oversample}
 	}
 	return src, nil
 }
