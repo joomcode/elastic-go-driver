@@ -1478,16 +1478,15 @@ func (c *Client) PerformRequest(ctx context.Context, opt PerformRequestOptions) 
 			return nil, err
 		}
 		if err != nil {
+			// A retry must not select the same failed preferred connection again.
+			c.errorf("elastic: %s is dead", conn.URL())
+			conn.MarkAsDead()
 			n++
 			wait, ok, rerr := retrier.Retry(ctx, n, (*http.Request)(req), res, err)
 			if rerr != nil {
-				c.errorf("elastic: %s is dead", conn.URL())
-				conn.MarkAsDead()
 				return nil, rerr
 			}
 			if !ok {
-				c.errorf("elastic: %s is dead", conn.URL())
-				conn.MarkAsDead()
 				return nil, err
 			}
 			retried = true
